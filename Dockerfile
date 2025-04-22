@@ -30,7 +30,7 @@ RUN composer install --no-interaction --prefer-dist --optimize-autoloader
 RUN chown -R www-data:www-data /var/www/html
 
 # Exponer el puerto que usará el contenedor
-EXPOSE 8080
+EXPOSE 80
 
 # Crear un script de entrada que ejecute las migraciones al iniciar
 COPY ./docker/entrypoint.sh /entrypoint.sh

@@ -1,7 +1,5 @@
-version: '3.8'
-
 services:
-  ###> Web service (Symfony + PHP) ###
+  ###> web service (Symfony + PHP) ###
   web:
     build:
       context: .
@@ -15,26 +13,23 @@ services:
       - mailer
     environment:
       APP_ENV: dev
-      DATABASE_URL: "mysql://user:userpassword@database:3306/escalada_db?serverVersion=10.6&charset=utf8mb4"
+      DATABASE_URL: postgres://${POSTGRES_USER:-app}:${POSTGRES_PASSWORD:-!ChangeMe!}@database:5432/${POSTGRES_DB:-app}
       MAILER_DSN: smtp://mailer:1025
-    entrypoint: ["/var/www/html/docker/entrypoint.sh"]
 
-  ###> MariaDB service ###
-#  database:
-#    image: mariadb:10.6
-#    environment:
-#      MYSQL_ROOT_PASSWORD: rootpassword
-#      MYSQL_DATABASE: escalada_db
-#      MYSQL_USER: user
-#      MYSQL_PASSWORD: userpassword
-#    healthcheck:
-#      test: ["CMD", "mysqladmin", "ping", "--silent"]
-#      retries: 5
-#      start_period: 30s
-#    volumes:
-#      - database_data:/var/lib/mysql
-#      - ./docker/escalada_db.sql:/docker-entrypoint-initdb.d/escalada_db.sql
-#    command: --skip-ssl
+  ###> doctrine/doctrine-bundle ###
+  database:
+    image: postgres:${POSTGRES_VERSION:-16}-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-app}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-!ChangeMe!}
+      POSTGRES_USER: ${POSTGRES_USER:-app}
+    healthcheck:
+      test: ["CMD", "pg_isready", "-d", "${POSTGRES_DB:-app}", "-U", "${POSTGRES_USER:-app}"]
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+    volumes:
+      - database_data:/var/lib/postgresql/data:rw
 
   ###> Mailer (MailHog) ###
   mailer:
@@ -43,7 +38,7 @@ services:
       - "8025:8025"
       - "1025:1025"
 
-  ###> Nginx service ###
+  ###> Nginx (para servir Symfony) ###
   nginx:
     image: nginx:alpine
     ports:
@@ -53,14 +48,6 @@ services:
       - ./docker/nginx/conf.d:/etc/nginx/conf.d
     depends_on:
       - web
-
-  ###> Adminer service ###
-  adminer:
-    image: adminer
-    ports:
-      - "8082:8080"
-    depends_on:
-      - database
 
 volumes:
   database_data:
