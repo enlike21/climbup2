@@ -17,24 +17,24 @@ services:
       APP_ENV: dev
       DATABASE_URL: "mysql://user:userpassword@database:3306/escalada_db?serverVersion=10.6&charset=utf8mb4"
       MAILER_DSN: smtp://mailer:1025
-    entrypoint: ["sh", "-c", "until php bin/console doctrine:query:sql 'SELECT 1' > /dev/null 2>&1; do sleep 2; done; php-fpm"]
+    entrypoint: ["/var/www/html/docker/entrypoint.sh"]
 
   ###> MariaDB service ###
-  database:
-    image: mariadb:10.6
-    environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: escalada_db
-      MYSQL_USER: user
-      MYSQL_PASSWORD: userpassword
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "--silent"]
-      retries: 5
-      start_period: 30s
-    volumes:
-      - database_data:/var/lib/mysql
-      - ./docker/escalada_db.sql:/docker-entrypoint-initdb.d/escalada_db.sql
-    command: --skip-ssl
+#  database:
+#    image: mariadb:10.6
+#    environment:
+#      MYSQL_ROOT_PASSWORD: rootpassword
+#      MYSQL_DATABASE: escalada_db
+#      MYSQL_USER: user
+#      MYSQL_PASSWORD: userpassword
+#    healthcheck:
+#      test: ["CMD", "mysqladmin", "ping", "--silent"]
+#      retries: 5
+#      start_period: 30s
+#    volumes:
+#      - database_data:/var/lib/mysql
+#      - ./docker/escalada_db.sql:/docker-entrypoint-initdb.d/escalada_db.sql
+#    command: --skip-ssl
 
   ###> Mailer (MailHog) ###
   mailer:

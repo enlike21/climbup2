@@ -7,10 +7,12 @@ until php bin/console doctrine:query:sql "SELECT 1" > /dev/null 2>&1; do
   sleep 2
 done
 
+php bin/console cache:clear
 
 echo "✅ Base de datos lista."
 echo "🎯 Ejecutando migraciones de Symfony..."
-php bin/console doctrine:migrations:migrate --no-interaction
+php bin/console doctrine:migrations:migrate --no-interaction || true
+
 
 echo "🚀 Iniciando PHP-FPM..."
 exec php-fpm
