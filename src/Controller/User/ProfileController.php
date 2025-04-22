@@ -19,17 +19,18 @@ class ProfileController extends AbstractController
     #[IsGranted('ROLE_USER')]
     public function edit(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): Response
     {
-        /** @var User $user */
         $user = $this->getUser();
+        if (!$user instanceof User) {
+            throw $this->createAccessDeniedException('Acceso denegado.');
+        }
+
         $form = $this->createForm(ProfileType::class, $user);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // Si se ha ingresado una nueva contraseña, la encriptamos
             $newPassword = $form->get('plainPassword')->getData();
             if ($newPassword) {
-                $hashedPassword = $passwordHasher->hashPassword($user, $newPassword);
-                $user->setPassword($hashedPassword);
+                $this->changePassword($user, $newPassword, $passwordHasher);
             }
 
             $entityManager->flush();
@@ -41,5 +42,11 @@ class ProfileController extends AbstractController
         return $this->render('profile/profile.html.twig', [
             'form' => $form->createView(),
         ]);
+    }
+
+    private function changePassword(User $user, string $newPassword, UserPasswordHasherInterface $passwordHasher): void
+    {
+        $hashedPassword = $passwordHasher->hashPassword($user, $newPassword);
+        $user->setPassword($hashedPassword);
     }
 }

@@ -9,73 +9,78 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('styles/main.css') }}">
-    <link rel="stylesheet" href="{{ asset('styles/buttons.css') }}">
     <link rel="stylesheet" href="{{ asset('styles/navbar.css') }}">
+    <link rel="stylesheet" href="{{ asset('styles/buttons.css') }}">
     <link rel="stylesheet" href="{{ asset('styles/responsive.css') }}">
 
     {% block stylesheets %}{% endblock %}
 </head>
-<body>
+<body class="{% block body_class %}{% endblock %}">
 <!-- Navbar -->
-<nav class="navbar navbar-expand-lg fixed-top">
-    <div class="container">
+<nav class="navbar navbar-expand-lg">
+    <div class="container-fluid px-4">
         <a class="navbar-brand" href="{{ path('homepage') }}">
             <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/climbUP_logo_top-Vhyq54TxeAPZOR5OTDnr3obGrk06zV.png" alt="CLIMBUP Logo">
+            <span>ClimbUp</span>
         </a>
 
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
                 aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <i class="fas fa-bars" style="color: var(--light)"></i>
+            <i class="fas fa-bars"></i>
         </button>
 
         <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ms-auto align-items-center">
-
+            <ul class="navbar-nav ms-auto">
                 <li class="nav-item">
-                    <a class="nav-link btn-custom btn-primary-custom {% if app.request.get('_route') == 'app_route_user_view' %}active{% endif %}"
-                       href="{{ path('app_route_user_view') }}">
+                    <a class="nav-link {% if app.request.get('_route') == 'app_route_user_view' %}active{% endif %}" href="{{ path('app_route_user_view') }}">
                         <i class="fas fa-map-marked-alt me-2"></i>Explorar Rutas
                     </a>
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link btn-custom btn-secondary-custom ms-2" href="{{ path('map') }}">
+                    <a class="nav-link {% if app.request.get('_route') == 'map' %}active{% endif %}" href="{{ path('map') }}">
                         <i class="fas fa-map me-2"></i>Ver Mapa
                     </a>
                 </li>
 
                 {% if app.user %}
-                    <li class="nav-item">
-                        <a class="nav-link btn-custom btn-secondary-custom ms-2" href="{{ path('app_saved_routes') }}">
-                            <i class="fas fa-list me-2"></i>Mis Rutas
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user-circle me-2"></i>{{ app.user.username|default('Usuario') }}
                         </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link btn-custom btn-secondary-custom ms-2" href="{{ path('app_profile') }}">
-                            <i class="fas fa-user-circle me-2"></i>Tu Perfil
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link btn-custom btn-secondary-custom ms-2" href="{{ path('logout') }}">
-                            <i class="fas fa-sign-out-alt me-2"></i>Cerrar sesión
-                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                            <li>
+                                <a class="dropdown-item" href="{{ path('app_saved_routes') }}">
+                                    <i class="fas fa-list me-2"></i>Mis Rutas
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{{ path('app_profile') }}">
+                                    <i class="fas fa-user me-2"></i>Tu Perfil
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item text-danger" href="{{ path('logout') }}">
+                                    <i class="fas fa-sign-out-alt me-2"></i>Cerrar sesión
+                                </a>
+                            </li>
+                        </ul>
                     </li>
                 {% else %}
-                    <!-- Iniciar Sesión -->
                     <li class="nav-item">
-                        <a class="nav-link btn-custom btn-secondary-custom" href="{{ path('login') }}">
+                        <a class="nav-link login-btn" href="{{ path('login') }}">
                             <i class="fas fa-sign-in-alt me-2"></i>Iniciar sesión
                         </a>
                     </li>
-                    <!-- Registrarse -->
                     <li class="nav-item">
-                        <a class="nav-link btn-custom btn-primary-custom ms-2" href="{{ path('app_register') }}">
+                        <a class="nav-link register-btn" href="{{ path('app_register') }}">
                             <i class="fas fa-user-plus me-2"></i>Registrarse
                         </a>
                     </li>
@@ -85,14 +90,68 @@
     </div>
 </nav>
 
-
 <!-- Main Content -->
-<div class="main-container">
-    {% block body %}{% endblock %}
-</div>
+{% block content %}{% endblock %}
+
+<!-- Footer -->
+<footer class="footer {% block footer_class %}{% endblock %}">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4 mb-4 mb-md-0">
+                <div class="d-flex align-items-center mb-3">
+                    <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/climbUP_logo_top-Vhyq54TxeAPZOR5OTDnr3obGrk06zV.png" alt="CLIMBUP Logo" class="footer-logo me-2">
+                    <h4 class="mb-0">ClimbUp</h4>
+                </div>
+                <p>Tu compañero perfecto para descubrir y compartir las mejores rutas de escalada.</p>
+            </div>
+            <div class="col-md-4 mb-4 mb-md-0">
+                <h5>Enlaces Rápidos</h5>
+                <ul class="footer-links">
+                    <li><a href="{{ path('app_route_user_view') }}">Explorar Rutas</a></li>
+                    <li><a href="{{ path('map') }}">Ver Mapa</a></li>
+                    {% if app.user %}
+                        <li><a href="{{ path('app_saved_routes') }}">Mis Rutas</a></li>
+                        <li><a href="{{ path('app_profile') }}">Mi Perfil</a></li>
+                    {% else %}
+                        <li><a href="{{ path('login') }}">Iniciar Sesión</a></li>
+                        <li><a href="{{ path('app_register') }}">Registrarse</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+            <div class="col-md-4">
+                <h5>Síguenos</h5>
+                <div class="social-links">
+                    <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="social-link"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; {{ "now"|date("Y") }} ClimbUp. Todos los derechos reservados.</p>
+        </div>
+    </div>
+</footer>
 
 <!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 {% block javascripts %}{% endblock %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Navbar scroll effect
+        const navbar = document.querySelector('.navbar');
+
+        if (document.body.classList.contains('homepage')) {
+            window.addEventListener('scroll', function() {
+                if (window.scrollY > 50) {
+                    navbar.classList.add('scrolled');
+                } else {
+                    navbar.classList.remove('scrolled');
+                }
+            });
+        }
+    });
+</script>
 </body>
 </html>

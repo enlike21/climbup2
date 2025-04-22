@@ -1,0 +1,86 @@
+/* styles/responsive.css */
+
+/* Extra small devices (phones, less than 576px) */
+@media (max-width: 575.98px) {
+    .main-container {
+        padding: 2rem 0.75rem;
+    }
+
+    h1 {
+        font-size: 1.75rem;
+    }
+
+    h2 {
+        font-size: 1.5rem;
+    }
+
+    .card {
+        margin-bottom: 1.5rem;
+    }
+
+    .footer {
+        padding: 2rem 0 1rem;
+    }
+
+    .back-to-top {
+        right: 15px;
+        bottom: 15px;
+    }
+}
+
+/* Small devices (landscape phones, 576px and up) */
+@media (min-width: 576px) and (max-width: 767.98px) {
+    .main-container {
+        padding: 2.5rem 1rem;
+    }
+}
+
+/* Medium devices (tablets, 768px and up) */
+@media (min-width: 768px) and (max-width: 991.98px) {
+    .main-container {
+        padding: 3rem 1.5rem;
+    }
+}
+
+/* Large devices (desktops, 992px and up) */
+@media (min-width: 992px) {
+    .main-container {
+        padding: 3rem 2rem;
+    }
+
+    .navbar-nav {
+        gap: 0.75rem;
+    }
+}
+
+/* Extra large devices (large desktops, 1200px and up) */
+@media (min-width: 1200px) {
+    .container {
+        max-width: 1140px;
+    }
+}
+
+/* Container width for extra extra large devices */
+@media (min-width: 1400px) {
+    .container {
+        max-width: 1320px;
+    }
+}
+
+/* Responsive typography */
+@media (max-width: 767.98px) {
+    html {
+        font-size: 14px;
+    }
+}
+
+/* Responsive footer */
+@media (max-width: 767.98px) {
+    .footer [class*="col-"] {
+        margin-bottom: 2rem;
+    }
+
+    .footer [class*="col-"]:last-child {
+        margin-bottom: 0;
+    }
+}

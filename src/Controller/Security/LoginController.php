@@ -14,9 +14,19 @@ class LoginController extends AbstractController
         $error = $authenticationUtils->getLastAuthenticationError();
         $lastUsername = $authenticationUtils->getLastUsername();
 
+        $errorMessage = null;
+
+        if ($error) {
+            if ($error->getMessageKey() === 'Bad credentials') {
+                $errorMessage = 'El nombre de usuario o la contraseña son incorrectos.';
+            } else {
+                $errorMessage = 'Hubo un problema con el inicio de sesión. Por favor, intenta nuevamente.';
+            }
+        }
+
         return $this->render('security/login.html.twig', [
             'last_username' => $lastUsername,
-            'error' => $error,
+            'error' => $errorMessage,
         ]);
     }
 

@@ -2,26 +2,50 @@
 
 {% block title %}Bienvenido a ClimbUP{% endblock %}
 
+{% block body_class %}homepage{% endblock %}
+
 {% block stylesheets %}
     {{ parent() }}
     <link rel="stylesheet" href="{{ asset('styles/pages/homepage.css') }}">
 {% endblock %}
 
+{% block content %}
+    <div class="homepage-container">
+        <div class="background-image"></div>
 
-{% block body %}
-    <section class="hero-section">
-        <div class="hero-content">
-            <img class="logo-index" src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/climbUP_logo_top-Vhyq54TxeAPZOR5OTDnr3obGrk06zV.png" alt="CLIMBUP Logo">
-            <h1 class="welcome-title">Descubre tu próxima aventura</h1>
-            <p class="welcome-subtitle">Únete a la comunidad de escaladores y encuentra las mejores rutas.</p>
+        <div class="homepage-content">
+            <div class="logo-container">
+                <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/climbUP_logo_top-Vhyq54TxeAPZOR5OTDnr3obGrk06zV.png" alt="CLIMBUP Logo" class="homepage-logo">
+            </div>
+
+            <div class="text-container">
+                <h1>Descubre tu próxima aventura</h1>
+                <p>Únete a la comunidad de escaladores y encuentra las mejores rutas.</p>
+            </div>
+
             <div class="buttons-container">
                 {% if is_granted('ROLE_USER') and not is_granted('ROLE_ADMIN') %}
-                    <a href="{{ path('app_route_user_view') }}" class="btn-hero">Explorar Rutas</a>
+                    <a href="{{ path('app_route_user_view') }}" class="homepage-btn primary-btn">
+                        <i class="fas fa-mountain me-2"></i>Explorar Rutas
+                    </a>
                 {% elseif is_granted('ROLE_ADMIN') %}
-                    <a href="{{ path('app_route_user_view') }}" class="btn-hero btn-primary">Explorar Rutas</a>
-                    <a href="{{ path('app_admin_dashboard') }}" class="btn-hero btn-secondary">Panel de Control</a>
+                    <a href="{{ path('app_route_user_view') }}" class="homepage-btn primary-btn">
+                        <i class="fas fa-mountain me-2"></i>Explorar Rutas
+                    </a>
+                    <a href="{{ path('app_admin_dashboard') }}" class="homepage-btn secondary-btn">
+                        <i class="fas fa-cogs me-2"></i>Panel de Control
+                    </a>
+                {% else %}
+                    <a href="{{ path('app_register') }}" class="homepage-btn primary-btn">
+                        <i class="fas fa-user-plus me-2"></i>Únete Ahora
+                    </a>
+                    <a href="{{ path('app_route_user_view') }}" class="homepage-btn secondary-btn">
+                        <i class="fas fa-search me-2"></i>Explorar Rutas
+                    </a>
                 {% endif %}
             </div>
         </div>
-    </section>
+    </div>
 {% endblock %}
+
+{% block footer_class %}homepage-footer{% endblock %}

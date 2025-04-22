@@ -2,77 +2,121 @@
 
 {% block title %}Registro - ClimbUp{% endblock %}
 
+{% block body_class %}auth-page{% endblock %}
+
 {% block stylesheets %}
     {{ parent() }}
     <link rel="stylesheet" href="{{ asset('styles/pages/security/login_register_form.css') }}">
 {% endblock %}
 
-{% block body %}
+{% block content %}
     <div class="auth-container">
-        <h1 class="auth-title">Únete a ClimbUp</h1>
-
         <div class="auth-card">
-            {{ form_start(registrationForm) }}
+            <div class="auth-header">
+                <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/climbUP_logo_top-Vhyq54TxeAPZOR5OTDnr3obGrk06zV.png" alt="ClimbUp Logo" class="auth-logo">
+                <h1 class="auth-title">Crear Cuenta</h1>
+            </div>
+
+            {{ form_start(registrationForm, {'attr': {'class': 'auth-form'}}) }}
             <div class="form-group">
-                {{ form_label(registrationForm.email, 'Correo Electrónico', {'label_attr': {'class': 'form-label'}}) }}
-                <i class="fas fa-envelope input-icon"></i>
-                {{ form_widget(registrationForm.email, {
-                    'attr': {
-                        'class': 'form-control',
-                        'placeholder': 'ejemplo@email.com'
-                    }
-                }) }}
+                <div class="input-wrapper">
+                    <i class="fas fa-envelope input-icon"></i>
+                    {{ form_widget(registrationForm.email, {
+                        'attr': {
+                            'class': 'form-control',
+                            'placeholder': 'Correo Electrónico'
+                        }
+                    }) }}
+                </div>
                 {{ form_errors(registrationForm.email, {'attr': {'class': 'form-error'}}) }}
             </div>
 
             <div class="form-group">
-                {{ form_label(registrationForm.plainPassword.first, 'Contraseña', {'label_attr': {'class': 'form-label'}}) }}
-                <i class="fas fa-lock input-icon"></i>
-                {{ form_widget(registrationForm.plainPassword.first, {
-                    'attr': {
-                        'class': 'form-control',
-                        'placeholder': 'Ingresa tu contraseña'
-                    }
-                }) }}
+                <div class="input-wrapper">
+                    <i class="fas fa-lock input-icon"></i>
+                    {{ form_widget(registrationForm.plainPassword.first, {
+                        'attr': {
+                            'class': 'form-control',
+                            'placeholder': 'Contraseña'
+                        }
+                    }) }}
+                    <button type="button" class="toggle-password" data-target="first" aria-label="Mostrar contraseña">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
                 {{ form_errors(registrationForm.plainPassword.first, {'attr': {'class': 'form-error'}}) }}
             </div>
 
             <div class="form-group">
-                {{ form_label(registrationForm.plainPassword.second, 'Confirmar Contraseña', {'label_attr': {'class': 'form-label'}}) }}
-                <i class="fas fa-lock input-icon"></i>
-                {{ form_widget(registrationForm.plainPassword.second, {
-                    'attr': {
-                        'class': 'form-control',
-                        'placeholder': 'Repite tu contraseña'
-                    }
-                }) }}
+                <div class="input-wrapper">
+                    <i class="fas fa-lock input-icon"></i>
+                    {{ form_widget(registrationForm.plainPassword.second, {
+                        'attr': {
+                            'class': 'form-control',
+                            'placeholder': 'Confirmar Contraseña'
+                        }
+                    }) }}
+                    <button type="button" class="toggle-password" data-target="second" aria-label="Mostrar contraseña">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
                 {{ form_errors(registrationForm.plainPassword.second, {'attr': {'class': 'form-error'}}) }}
             </div>
 
             <div class="form-group">
-                {{ form_label(registrationForm.name, 'Nombre', {'label_attr': {'class': 'form-label'}}) }}
-                <i class="fas fa-user input-icon"></i>
-                {{ form_widget(registrationForm.name, {
-                    'attr': {
-                        'class': 'form-control',
-                        'placeholder': 'Tu nombre'
-                    }
-                }) }}
+                <div class="input-wrapper">
+                    <i class="fas fa-user input-icon"></i>
+                    {{ form_widget(registrationForm.name, {
+                        'attr': {
+                            'class': 'form-control',
+                            'placeholder': 'Nombre'
+                        }
+                    }) }}
+                </div>
                 {{ form_errors(registrationForm.name, {'attr': {'class': 'form-error'}}) }}
             </div>
 
             <button type="submit" class="btn btn-auth">
                 <i class="fas fa-user-plus me-2"></i>
-                Crear cuenta
+                Crear Cuenta
             </button>
             {{ form_end(registrationForm) }}
-        </div>
 
-        <div class="text-center">
-            <a href="{{ path('login') }}" class="auth-link">
-                <i class="fas fa-sign-in-alt"></i>
-                ¿Ya tienes una cuenta? Inicia sesión
-            </a>
+            <div class="auth-footer">
+                <p>¿Ya tienes una cuenta? <a href="{{ path('login') }}" class="register-link">Inicia sesión</a></p>
+            </div>
         </div>
     </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Toggle password visibility
+            const toggleButtons = document.querySelectorAll('.toggle-password');
+
+            toggleButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const target = this.getAttribute('data-target');
+                    const passwordInput = document.querySelector(`#registration_form_plainPassword_${target}`);
+
+                    if (passwordInput) {
+                        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                        passwordInput.setAttribute('type', type);
+
+                        // Toggle icon
+                        const icon = this.querySelector('i');
+                        if (type === 'password') {
+                            icon.classList.remove('fa-eye-slash');
+                            icon.classList.add('fa-eye');
+                        } else {
+                            icon.classList.remove('fa-eye');
+                            icon.classList.add('fa-eye-slash');
+                        }
+                    }
+                });
+            });
+        });
+    </script>
 {% endblock %}
