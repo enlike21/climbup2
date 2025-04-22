@@ -24,7 +24,7 @@ WORKDIR /var/www/html
 COPY . /var/www/html
 
 # Instalar las dependencias de Symfony
-RUN composer install --no-dev --optimize-autoloader
+RUN composer install --no-interaction --prefer-dist --optimize-autoloader
 
 # Establecer permisos para el directorio de Symfony
 RUN chown -R www-data:www-data /var/www/html
@@ -36,5 +36,4 @@ EXPOSE 80
 COPY ./docker/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-CMD ["php", "-S", "0.0.0.0:8000", "-t", "public"]
-EXPOSE 8000
+CMD ["/entrypoint.sh"]
