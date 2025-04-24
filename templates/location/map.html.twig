@@ -1,59 +1,392 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Mapa de Andalucía{% endblock %}
+{% block title %}Mapa de Rutas - ClimbUp{% endblock %}
+
+{% block body_class %}map-page{% endblock %}
 
 {% block stylesheets %}
     {{ parent() }}
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css" />
     <link rel="stylesheet" href="{{ asset('styles/pages/location/map.css') }}">
 {% endblock %}
 
-{% block body %}
-    <div class="container mt-4">
+{% block content %}
+    <div class="map-wrapper">
+        <!-- Sidebar para filtros y lista de ubicaciones -->
+        <div class="map-sidebar">
+            <div class="sidebar-header">
+                <h2>Ubicaciones</h2>
+                <button class="btn-toggle-sidebar" aria-label="Cerrar panel lateral">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
+
+            <div class="sidebar-search">
+                <div class="input-wrapper">
+                    <i class="fas fa-search input-icon"></i>
+                    <input type="text" id="location-search" class="form-control" placeholder="Buscar ubicación...">
+                </div>
+            </div>
+
+            <div class="sidebar-filters">
+                <h3>Filtros</h3>
+                <div class="filter-group">
+                    <label class="filter-label">Tipo de ruta</label>
+                    <div class="filter-options">
+                        <label class="filter-option">
+                            <input type="checkbox" value="sport" checked> Sport
+                        </label>
+                        <label class="filter-option">
+                            <input type="checkbox" value="trad" checked> Trad
+                        </label>
+                        <label class="filter-option">
+                            <input type="checkbox" value="boulder" checked> Boulder
+                        </label>
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label">Dificultad</label>
+                    <div class="difficulty-slider">
+                        <div id="difficulty-range"></div>
+                        <div class="difficulty-values">
+                            <span id="min-difficulty">Fácil</span>
+                            <span id="max-difficulty">Difícil</span>
+                        </div>
+                    </div>
+                </div>
+
+                <button id="apply-filters" class="btn-apply-filters">
+                    <i class="fas fa-filter me-2"></i>Aplicar filtros
+                </button>
+            </div>
+
+            <div class="sidebar-locations">
+                <h3>Listado de zonas</h3>
+                <div id="locations-list" class="locations-list">
+                    <!-- Las ubicaciones se cargarán dinámicamente aquí -->
+                    <div class="loading-spinner">
+                        <i class="fas fa-circle-notch fa-spin"></i>
+                        <span>Cargando ubicaciones...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Botón para mostrar/ocultar sidebar en móvil -->
+        <button class="btn-mobile-toggle">
+            <i class="fas fa-list"></i>
+        </button>
+
+        <!-- Contenedor principal del mapa -->
         <div class="map-container">
             <div class="map-header">
-                <h1 class="text-center">📍 Mapa de Andalucía</h1>
-                <p class="text-center">Explora las rutas de escalada. Haz clic en un marcador para ver más
-                    información.</p>
+                <h1>Mapa de Rutas de Escalada</h1>
+                <p>Explora las mejores zonas de escalada en Andalucía</p>
             </div>
+
             <div id="map"></div>
+
+            <div class="map-controls">
+                <button id="reset-map" class="map-control-btn" title="Centrar mapa">
+                    <i class="fas fa-home"></i>
+                </button>
+                <button id="locate-me" class="map-control-btn" title="Mi ubicación">
+                    <i class="fas fa-location-arrow"></i>
+                </button>
+            </div>
+
+            <div class="map-legend">
+                <h4>Leyenda</h4>
+                <div class="legend-item">
+                    <span class="legend-marker sport"></span> Sport
+                </div>
+                <div class="legend-item">
+                    <span class="legend-marker trad"></span> Trad
+                </div>
+                <div class="legend-item">
+                    <span class="legend-marker boulder"></span> Boulder
+                </div>
+                <div class="legend-item">
+                    <span class="legend-marker mixed"></span> Mixto
+                </div>
+            </div>
         </div>
     </div>
+{% endblock %}
 
+{% block javascripts %}
+    {{ parent() }}
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            var map = L.map('map').setView([37.5, -4.5], 7);
+            // Inicializar el mapa
+            var map = L.map('map', {
+                zoomControl: false,
+                attributionControl: false
+            }).setView([37.5, -4.5], 7);
 
+            // Añadir capa de mapa base
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; OpenStreetMap contributors'
             }).addTo(map);
 
+            // Añadir control de atribución en la esquina inferior derecha
+            L.control.attribution({
+                position: 'bottomright'
+            }).addTo(map);
+
+            // Añadir control de zoom en la esquina inferior derecha
+            L.control.zoom({
+                position: 'bottomright'
+            }).addTo(map);
+
+            // Crear grupo de marcadores para clustering
+            var markers = L.markerClusterGroup({
+                showCoverageOnHover: false,
+                maxClusterRadius: 50,
+                iconCreateFunction: function(cluster) {
+                    return L.divIcon({
+                        html: '<div class="cluster-icon">' + cluster.getChildCount() + '</div>',
+                        className: 'custom-cluster-icon',
+                        iconSize: L.point(40, 40)
+                    });
+                }
+            });
+
+            // Objeto para almacenar todos los marcadores
+            var allMarkers = {};
+            var locationsList = document.getElementById('locations-list');
+
+            // Función para crear un icono personalizado según el tipo de ruta
+            function createCustomIcon(type) {
+                var iconClass = 'marker-icon';
+
+                switch(type) {
+                    case 'Sport':
+                        iconClass += ' sport';
+                        break;
+                    case 'Trad':
+                        iconClass += ' trad';
+                        break;
+                    case 'Boulder':
+                        iconClass += ' boulder';
+                        break;
+                    default:
+                        iconClass += ' mixed';
+                }
+
+                return L.divIcon({
+                    html: '<i class="fas fa-map-marker-alt"></i>',
+                    className: iconClass,
+                    iconSize: [30, 42],
+                    iconAnchor: [15, 42],
+                    popupAnchor: [0, -42]
+                });
+            }
+
+            // Función para crear el contenido del popup
+            function createPopupContent(location) {
+                return `
+                    <div class="custom-popup">
+                        <h3>${location.name}</h3>
+                        <div class="popup-details">
+                            <div class="popup-detail">
+                                <i class="fas fa-mountain"></i>
+                                <span>${location.routeCount || 0} rutas</span>
+                            </div>
+                        </div>
+                        <div class="popup-actions">
+                            <a href="{{ path('location_routes', {id: 'ID_REPLACE'}) }}" class="btn-view-routes">
+                                <i class="fas fa-route me-1"></i> Ver rutas
+                            </a>
+                            <button class="btn-directions" data-lat="${location.latitude}" data-lng="${location.longitude}">
+                                <i class="fas fa-directions me-1"></i> Cómo llegar
+                            </button>
+                        </div>
+                    </div>
+                `.replace('ID_REPLACE', location.id);
+            }
+
+            // Función para crear un elemento de lista para la ubicación
+            function createLocationListItem(location) {
+                var listItem = document.createElement('div');
+                listItem.className = 'location-item';
+                listItem.setAttribute('data-id', location.id);
+
+                var typeClass = 'location-type ' + (location.predominantType || 'mixed').toLowerCase();
+
+                listItem.innerHTML = `
+                    <div class="${typeClass}"></div>
+                    <div class="location-info">
+                        <h4>${location.name}</h4>
+                        <div class="location-meta">
+                            <span><i class="fas fa-mountain"></i> ${location.routeCount || 0}</span>
+                        </div>
+                    </div>
+                    <button class="btn-location-action">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                `;
+
+                // Añadir evento de clic para centrar el mapa en esta ubicación
+                listItem.addEventListener('click', function() {
+                    var marker = allMarkers[location.id];
+                    if (marker) {
+                        map.setView([location.latitude, location.longitude], 13);
+                        marker.openPopup();
+
+                        // En móvil, cerrar el sidebar después de seleccionar
+                        if (window.innerWidth < 768) {
+                            document.querySelector('.map-wrapper').classList.remove('sidebar-open');
+                        }
+                    }
+                });
+
+                return listItem;
+            }
+
+            // Cargar ubicaciones desde la API
+            fetch("{{ path('api_locations') }}")
+                .then(response => response.json())
+                .then(data => {
+                    // Limpiar el indicador de carga
+                    locationsList.innerHTML = '';
+
+                    data.forEach(location => {
+                        // Crear marcador con icono personalizado
+                        var icon = createCustomIcon(location.predominantType || 'Mixed');
+                        var marker = L.marker([location.latitude, location.longitude], {icon: icon});
+
+                        // Crear popup personalizado
+                        var popupContent = createPopupContent(location);
+                        marker.bindPopup(popupContent);
+
+                        // Almacenar el marcador para referencia futura
+                        allMarkers[location.id] = marker;
+
+                        // Añadir el marcador al grupo de clustering
+                        markers.addLayer(marker);
+
+                        // Crear y añadir elemento de lista para esta ubicación
+                        var listItem = createLocationListItem(location);
+                        locationsList.appendChild(listItem);
+                    });
+
+                    // Añadir el grupo de marcadores al mapa
+                    map.addLayer(markers);
+
+                    // Configurar eventos para los popups
+                    map.on('popupopen', function(e) {
+                        var popup = e.popup;
+                        var directionsBtn = popup._contentNode.querySelector('.btn-directions');
+
+                        if (directionsBtn) {
+                            directionsBtn.addEventListener('click', function() {
+                                var lat = this.getAttribute('data-lat');
+                                var lng = this.getAttribute('data-lng');
+                                var url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+                                window.open(url, '_blank');
+                            });
+                        }
+                    });
+                })
+                .catch(error => {
+                    console.error("Error cargando ubicaciones:", error);
+                    locationsList.innerHTML = '<div class="error-message"><i class="fas fa-exclamation-circle"></i> Error al cargar ubicaciones</div>';
+                });
+
+            // Función para resetear la vista del mapa
             function resetMap() {
                 map.setView([37.5, -4.5], 7);
             }
 
-            fetch("{{ path('api_locations') }}")
-                .then(response => response.json())
-                .then(data => {
-                    data.forEach(location => {
-                        var marker = L.marker([location.latitude, location.longitude]).addTo(map);
+            // Botón para resetear el mapa
+            document.getElementById('reset-map').addEventListener('click', resetMap);
 
-                        marker.bindPopup(`
-                            <div style="text-align:center;">
-                                <strong>${location.name}</strong><br>
-                                <a href="{{ path('location_routes', {id: 'ID_REPLACE'}) }}"
-                                   class="btn-view-routes" style="color:white">
-                                   🧗 Ver rutas
-                                </a>
-                            </div>`.replace('ID_REPLACE', location.id), {closeButton: false});
+            // Botón para localizar al usuario
+            document.getElementById('locate-me').addEventListener('click', function() {
+                map.locate({setView: true, maxZoom: 13});
+            });
 
-                        marker.on("click", function () {
-                            marker.openPopup();
-                        });
-                    });
-                })
-                .catch(error => console.error("Error cargando ubicaciones:", error));
+            // Manejar errores de geolocalización
+            map.on('locationerror', function(e) {
+                alert("No se pudo acceder a tu ubicación. Por favor, verifica los permisos de tu navegador.");
+            });
+
+            // Toggle del sidebar en móvil
+            document.querySelector('.btn-mobile-toggle').addEventListener('click', function() {
+                document.querySelector('.map-wrapper').classList.add('sidebar-open');
+            });
+
+            document.querySelector('.btn-toggle-sidebar').addEventListener('click', function() {
+                document.querySelector('.map-wrapper').classList.remove('sidebar-open');
+            });
+
+            // Filtrado de ubicaciones
+            var searchInput = document.getElementById('location-search');
+            searchInput.addEventListener('input', function() {
+                var searchTerm = this.value.toLowerCase();
+                var locationItems = document.querySelectorAll('.location-item');
+
+                locationItems.forEach(function(item) {
+                    var locationName = item.querySelector('h4').textContent.toLowerCase();
+                    item.style.display = locationName.includes(searchTerm) ? 'block' : 'none';
+                });
+            });
+
+            // Filtro de tipo de ruta
+            var filterTypes = document.querySelectorAll('.filter-option input');
+            filterTypes.forEach(function(filter) {
+                filter.addEventListener('change', applyFilters);
+            });
+
+            // Filtro de dificultad
+            var difficultySlider = document.getElementById('difficulty-range');
+            var minDifficulty = document.getElementById('min-difficulty');
+            var maxDifficulty = document.getElementById('max-difficulty');
+
+            noUiSlider.create(difficultySlider, {
+                start: [0, 5],
+                range: {
+                    'min': 0,
+                    'max': 5
+                },
+                connect: true,
+                step: 1,
+                format: {
+                    to: function(value) { return ['Fácil', 'Moderada', 'Difícil'][value]; },
+                    from: function(value) { return ['Fácil', 'Moderada', 'Difícil'].indexOf(value); }
+                }
+            });
+
+            difficultySlider.noUiSlider.on('update', function(values) {
+                minDifficulty.textContent = values[0];
+                maxDifficulty.textContent = values[1];
+            });
+
+            // Aplicar filtros
+            function applyFilters() {
+                var selectedTypes = [];
+                filterTypes.forEach(function(filter) {
+                    if (filter.checked) {
+                        selectedTypes.push(filter.value);
+                    }
+                });
+
+                var filteredMarkers = markers.getLayers().filter(function(marker) {
+                    var location = marker.options.location;
+                    return selectedTypes.includes(location.type);
+                });
+
+                markers.clearLayers();
+                filteredMarkers.forEach(function(marker) {
+                    markers.addLayer(marker);
+                });
+            }
         });
     </script>
 {% endblock %}

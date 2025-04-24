@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Bienvenido a ClimbUP{% endblock %}
+{% block title %}Bienvenido a ClimbUP - Tu Aventura Comienza Aquí{% endblock %}
 
 {% block body_class %}homepage{% endblock %}
 
@@ -11,41 +11,159 @@
 
 {% block content %}
     <div class="homepage-container">
-        <div class="background-image"></div>
+        <!-- Hero Section con Parallax -->
+        <section class="hero-section">
+            <div class="parallax-bg"></div>
+            <div class="overlay-gradient"></div>
 
-        <div class="homepage-content">
-            <div class="logo-container">
-                <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/climbUP_logo_top-Vhyq54TxeAPZOR5OTDnr3obGrk06zV.png" alt="CLIMBUP Logo" class="homepage-logo">
+            <div class="hero-content">
+                <div class="logo-container animate-element">
+                    <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/climbUP_logo_top-Vhyq54TxeAPZOR5OTDnr3obGrk06zV.png" alt="CLIMBUP Logo" class="homepage-logo inverted-logo">
+                </div>
+
+                <div class="hero-text animate-element">
+                    <h1 class="hero-title">SUPERA TUS LÍMITES</h1>
+                    <div class="tagline-container">
+                        <p class="hero-tagline">Descubre. Escala. Conquista.</p>
+                    </div>
+                </div>
+
+                <div class="hero-cta animate-element">
+                    {% if is_granted('ROLE_USER') and not is_granted('ROLE_ADMIN') %}
+                        <a href="{{ path('app_route_user_view') }}" class="cta-button primary-cta">
+                            <span class="cta-icon"><i class="fas fa-mountain"></i></span>
+                            <span class="cta-text">Explorar Rutas</span>
+                        </a>
+                    {% elseif is_granted('ROLE_ADMIN') %}
+                        <a href="{{ path('app_route_user_view') }}" class="cta-button primary-cta">
+                            <span class="cta-icon"><i class="fas fa-mountain"></i></span>
+                            <span class="cta-text">Explorar Rutas</span>
+                        </a>
+                        <a href="{{ path('app_admin_dashboard') }}" class="cta-button secondary-cta">
+                            <span class="cta-icon"><i class="fas fa-cogs"></i></span>
+                            <span class="cta-text">Panel de Control</span>
+                        </a>
+                    {% else %}
+                        <a href="{{ path('app_register') }}" class="cta-button primary-cta">
+                            <span class="cta-icon"><i class="fas fa-user-plus"></i></span>
+                            <span class="cta-text">Únete Ahora</span>
+                        </a>
+                        <a href="{{ path('app_route_user_view') }}" class="cta-button secondary-cta">
+                            <span class="cta-icon"><i class="fas fa-search"></i></span>
+                            <span class="cta-text">Explorar Rutas</span>
+                        </a>
+                    {% endif %}
+                </div>
             </div>
 
-            <div class="text-container">
-                <h1>Descubre tu próxima aventura</h1>
-                <p>Únete a la comunidad de escaladores y encuentra las mejores rutas.</p>
+            <div class="scroll-indicator">
+                <div class="mouse">
+                    <div class="wheel"></div>
+                </div>
+                <div class="arrow-scroll">
+                    <span></span>
+                </div>
             </div>
 
-            <div class="buttons-container">
-                {% if is_granted('ROLE_USER') and not is_granted('ROLE_ADMIN') %}
-                    <a href="{{ path('app_route_user_view') }}" class="homepage-btn primary-btn">
-                        <i class="fas fa-mountain me-2"></i>Explorar Rutas
-                    </a>
-                {% elseif is_granted('ROLE_ADMIN') %}
-                    <a href="{{ path('app_route_user_view') }}" class="homepage-btn primary-btn">
-                        <i class="fas fa-mountain me-2"></i>Explorar Rutas
-                    </a>
-                    <a href="{{ path('app_admin_dashboard') }}" class="homepage-btn secondary-btn">
-                        <i class="fas fa-cogs me-2"></i>Panel de Control
+            <!-- Elementos decorativos -->
+            <div class="climbing-elements">
+                <div class="carabiner carabiner-1"></div>
+                <div class="carabiner carabiner-2"></div>
+                <div class="rope rope-left"></div>
+                <div class="rope rope-right"></div>
+                <div class="mountain-silhouette"></div>
+            </div>
+        </section>
+
+        <!-- Características destacadas -->
+        <section class="features-section">
+            <div class="features-container">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-map-marked-alt"></i>
+                    </div>
+                    <h3>Descubre Rutas</h3>
+                    <p>Explora cientos de rutas verificadas por escaladores experimentados.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3>Comunidad Activa</h3>
+                    <p>Conecta con escaladores, comparte experiencias y organiza salidas.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <h3>Acceso Móvil</h3>
+                    <p>Lleva tus rutas favoritas contigo.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Banner de llamada a la acción -->
+        <section class="cta-banner">
+            <div class="cta-content">
+                <h2>¿Listo para la aventura?</h2>
+                <p>Únete a miles de escaladores que ya están descubriendo nuevas rutas cada día.</p>
+                {% if not is_granted('IS_AUTHENTICATED_FULLY') %}
+                    <a href="{{ path('app_register') }}" class="banner-cta-button">
+                        Comenzar Ahora <i class="fas fa-chevron-right"></i>
                     </a>
                 {% else %}
-                    <a href="{{ path('app_register') }}" class="homepage-btn primary-btn">
-                        <i class="fas fa-user-plus me-2"></i>Únete Ahora
-                    </a>
-                    <a href="{{ path('app_route_user_view') }}" class="homepage-btn secondary-btn">
-                        <i class="fas fa-search me-2"></i>Explorar Rutas
+                    <a href="{{ path('app_route_user_view') }}" class="banner-cta-button">
+                        Ver Rutas <i class="fas fa-chevron-right"></i>
                     </a>
                 {% endif %}
             </div>
-        </div>
+        </section>
     </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animación de elementos al cargar la página
+            const animateElements = document.querySelectorAll('.animate-element');
+            setTimeout(() => {
+                animateElements.forEach((element, index) => {
+                    setTimeout(() => {
+                        element.classList.add('visible');
+                    }, index * 200);
+                });
+            }, 300);
+
+            // Efecto parallax en scroll
+            window.addEventListener('scroll', function() {
+                const scrollPosition = window.pageYOffset;
+                const parallaxBg = document.querySelector('.parallax-bg');
+                const mountainSilhouette = document.querySelector('.mountain-silhouette');
+
+                if (parallaxBg) {
+                    parallaxBg.style.transform = `translateY(${scrollPosition * 0.4}px)`;
+                }
+
+                if (mountainSilhouette) {
+                    mountainSilhouette.style.transform = `translateY(${scrollPosition * 0.2}px)`;
+                }
+
+                // Animación de aparición para las tarjetas de características
+                const featureCards = document.querySelectorAll('.feature-card');
+                featureCards.forEach(card => {
+                    const cardTop = card.getBoundingClientRect().top;
+                    const windowHeight = window.innerHeight;
+
+                    if (cardTop < windowHeight * 0.85) {
+                        card.classList.add('visible');
+                    }
+                });
+            });
+        });
+    </script>
 {% endblock %}
 
 {% block footer_class %}homepage-footer{% endblock %}

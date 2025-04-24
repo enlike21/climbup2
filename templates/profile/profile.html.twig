@@ -7,50 +7,466 @@
     <link rel="stylesheet" href="{{ asset('styles/pages/profile/edit_profile.css') }}">
 {% endblock %}
 
-{% block body %}
+{% block body_class %}profile-page{% endblock %}
+
+{% block content %}
     <div class="profile-container">
-        <h1 class="profile-title">Tu Perfil</h1>
+        <!-- Cabecera del perfil -->
+        <div class="profile-header">
+            <div class="profile-cover">
+                <div class="profile-avatar-container">
+                    <div class="profile-avatar">
+                        {% if app.user.avatar %}
+                            <img src="{{ asset('uploads/avatars/' ~ app.user.avatar) }}" alt="{{ app.user.name }}">
+                        {% else %}
+                            <div class="avatar-placeholder">
+                                <i class="fas fa-user"></i>
+                            </div>
+                        {% endif %}
+                        <label for="avatar-upload" class="avatar-upload-btn">
+                            <i class="fas fa-camera"></i>
+                        </label>
+                        <input type="file" id="avatar-upload" class="d-none">
+                    </div>
+                </div>
+                <h1 class="profile-name">{{ app.user.name }}</h1>
+                <p class="profile-since">Miembro desde {{ app.user.createdAt|date('d/m/Y') }}</p>
+            </div>
+        </div>
 
-        <div class="profile-card">
-            {{ form_start(form) }}
-            <div class="form-group">
-                {{ form_label(form.name, 'Nombre', {'label_attr': {'class': 'form-label'}}) }}
-                <i class="fas fa-user input-icon"></i>
-                {{ form_widget(form.name, {
-                    'attr': {
-                        'class': 'form-control',
-                        'placeholder': 'Tu nombre'
-                    }
-                }) }}
+        <!-- Navegación del perfil -->
+        <div class="profile-nav">
+            <ul class="nav-tabs">
+                <li class="nav-item active" data-tab="personal-info">
+                    <i class="fas fa-user"></i>
+                    <span>Información Personal</span>
+                </li>
+                <li class="nav-item" data-tab="preferences">
+                    <i class="fas fa-sliders-h"></i>
+                    <span>Preferencias</span>
+                </li>
+                <li class="nav-item" data-tab="security">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>Seguridad</span>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Contenido principal -->
+        <div class="profile-content">
+            <!-- Estadísticas rápidas -->
+            <div class="profile-stats">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-route"></i>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-value">{{ app.user.completedRoutes|length|default(0) }}</span>
+                        <span class="stat-label">Rutas completadas</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-value">{{ app.user.favoriteRoutes|length|default(0) }}</span>
+                        <span class="stat-label">Rutas favoritas</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-value">{{ app.user.visitedLocations|length|default(0) }}</span>
+                        <span class="stat-label">Ubicaciones visitadas</span>
+                    </div>
+                </div>
             </div>
 
-            <div class="form-group">
-                {{ form_label(form.email, 'Correo Electrónico', {'label_attr': {'class': 'form-label'}}) }}
-                <i class="fas fa-envelope input-icon"></i>
-                {{ form_widget(form.email, {
-                    'attr': {
-                        'class': 'form-control',
-                        'readonly': 'readonly'
-                    }
-                }) }}
-            </div>
+            <!-- Pestañas de contenido -->
+            <div class="tab-content">
+                <!-- Pestaña de información personal -->
+                <div class="tab-pane active" id="personal-info">
+                    <div class="profile-card">
+                        <div class="card-header">
+                            <h2>Información Personal</h2>
+                            <p>Actualiza tu información personal y de contacto</p>
+                        </div>
 
-            <div class="form-group">
-                {{ form_label(form.plainPassword, 'Nueva Contraseña (opcional)', {'label_attr': {'class': 'form-label'}}) }}
-                <i class="fas fa-lock input-icon"></i>
-                {{ form_widget(form.plainPassword, {
-                    'attr': {
-                        'class': 'form-control',
-                        'placeholder': 'Deja en blanco para no cambiar'
-                    }
-                }) }}
-            </div>
+                        {{ form_start(form, {'attr': {'class': 'profile-form'}}) }}
+                        <div class="form-row">
+                            <div class="form-group">
+                                {{ form_label(form.name, 'Nombre completo', {'label_attr': {'class': 'form-label'}}) }}
+                                <div class="input-wrapper">
+                                    <i class="fas fa-user input-icon"></i>
+                                    {{ form_widget(form.name, {
+                                        'attr': {
+                                            'class': 'form-control',
+                                            'placeholder': 'Tu nombre completo'
+                                        }
+                                    }) }}
+                                </div>
+                                <div class="form-help">Tu nombre será visible para otros usuarios</div>
+                            </div>
 
-            <button type="submit" class="btn btn-profile">
-                <i class="fas fa-save me-2"></i>
-                Guardar cambios
-            </button>
-            {{ form_end(form) }}
+                            <div class="form-group">
+                                {{ form_label(form.email, 'Correo Electrónico', {'label_attr': {'class': 'form-label'}}) }}
+                                <div class="input-wrapper">
+                                    <i class="fas fa-envelope input-icon"></i>
+                                    {{ form_widget(form.email, {
+                                        'attr': {
+                                            'class': 'form-control',
+                                            'readonly': 'readonly'
+                                        }
+                                    }) }}
+                                </div>
+                                <div class="form-help">No puedes cambiar tu correo electrónico</div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="climbing_level" class="form-label">Nivel de escalada</label>
+                            <div class="input-wrapper">
+                                <i class="fas fa-mountain input-icon"></i>
+                                <select id="climbing_level" class="form-control">
+                                    <option value="">Selecciona tu nivel</option>
+                                    <option value="beginner" {% if app.user.climbingLevel == 'beginner' %}selected{% endif %}>Principiante</option>
+                                    <option value="intermediate" {% if app.user.climbingLevel == 'intermediate' %}selected{% endif %}>Intermedio</option>
+                                    <option value="advanced" {% if app.user.climbingLevel == 'advanced' %}selected{% endif %}>Avanzado</option>
+                                    <option value="expert" {% if app.user.climbingLevel == 'expert' %}selected{% endif %}>Experto</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="bio" class="form-label">Biografía</label>
+                            <div class="input-wrapper">
+                                <i class="fas fa-edit input-icon"></i>
+                                <textarea id="bio" class="form-control" rows="4" placeholder="Cuéntanos sobre ti y tu experiencia en escalada">{{ app.user.bio|default('') }}</textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i>
+                                Guardar cambios
+                            </button>
+                        </div>
+                        {{ form_end(form) }}
+                    </div>
+                </div>
+
+                <!-- Pestaña de preferencias -->
+                <div class="tab-pane" id="preferences">
+                    <div class="profile-card">
+                        <div class="card-header">
+                            <h2>Preferencias</h2>
+                            <p>Personaliza tu experiencia en ClimbUp</p>
+                        </div>
+
+                        <form class="profile-form">
+                            <div class="form-group">
+                                <label class="form-label">Tipos de escalada preferidos</label>
+                                <div class="checkbox-group">
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" name="climbing_types[]" value="sport" checked>
+                                        <span class="checkbox-custom"></span>
+                                        <span>Deportiva</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" name="climbing_types[]" value="trad">
+                                        <span class="checkbox-custom"></span>
+                                        <span>Tradicional</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" name="climbing_types[]" value="boulder">
+                                        <span class="checkbox-custom"></span>
+                                        <span>Boulder</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Rango de dificultad</label>
+                                <div class="range-slider">
+                                    <div class="range-values">
+                                        <span id="min-grade">4a</span>
+                                        <span id="max-grade">8c</span>
+                                    </div>
+                                    <div class="range-inputs">
+                                        <input type="range" id="min-grade-range" min="1" max="20" value="5">
+                                        <input type="range" id="max-grade-range" min="1" max="20" value="15">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Notificaciones</label>
+                                <div class="toggle-group">
+                                    <div class="toggle-item">
+                                        <span>Nuevas rutas cercanas</span>
+                                        <label class="toggle">
+                                            <input type="checkbox" checked>
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                    <div class="toggle-item">
+                                        <span>Comentarios en mis rutas</span>
+                                        <label class="toggle">
+                                            <input type="checkbox" checked>
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                    <div class="toggle-item">
+                                        <span>Boletín semanal</span>
+                                        <label class="toggle">
+                                            <input type="checkbox">
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i>
+                                    Guardar preferencias
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Pestaña de seguridad -->
+                <div class="tab-pane" id="security">
+                    <div class="profile-card">
+                        <div class="card-header">
+                            <h2>Seguridad</h2>
+                            <p>Gestiona tu contraseña y la seguridad de tu cuenta</p>
+                        </div>
+
+                        <form class="profile-form">
+                            <div class="form-group">
+                                <label for="current_password" class="form-label">Contraseña actual</label>
+                                <div class="input-wrapper">
+                                    <i class="fas fa-lock input-icon"></i>
+                                    <input type="password" id="current_password" class="form-control" placeholder="Introduce tu contraseña actual">
+                                    <button type="button" class="password-toggle">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                {{ form_label(form.plainPassword, 'Nueva Contraseña', {'label_attr': {'class': 'form-label'}}) }}
+                                <div class="input-wrapper">
+                                    <i class="fas fa-key input-icon"></i>
+                                    {{ form_widget(form.plainPassword, {
+                                        'attr': {
+                                            'class': 'form-control',
+                                            'placeholder': 'Introduce tu nueva contraseña'
+                                        }
+                                    }) }}
+                                    <button type="button" class="password-toggle">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                                <div class="password-strength">
+                                    <div class="strength-meter">
+                                        <div class="strength-bar" style="width: 0%"></div>
+                                    </div>
+                                    <span class="strength-text">Introduce una contraseña</span>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="confirm_password" class="form-label">Confirmar nueva contraseña</label>
+                                <div class="input-wrapper">
+                                    <i class="fas fa-key input-icon"></i>
+                                    <input type="password" id="confirm_password" class="form-control" placeholder="Confirma tu nueva contraseña">
+                                    <button type="button" class="password-toggle">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Seguridad adicional</label>
+                                <div class="toggle-group">
+                                    <div class="toggle-item">
+                                        <span>Autenticación en dos pasos</span>
+                                        <label class="toggle">
+                                            <input type="checkbox">
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                    <div class="toggle-item">
+                                        <span>Notificar inicios de sesión</span>
+                                        <label class="toggle">
+                                            <input type="checkbox" checked>
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i>
+                                    Actualizar seguridad
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="profile-card danger-zone">
+                        <div class="card-header">
+                            <h2>Zona de peligro</h2>
+                            <p>Acciones irreversibles para tu cuenta</p>
+                        </div>
+
+                        <div class="danger-actions">
+                            <div class="danger-action">
+                                <div>
+                                    <h3>Descargar mis datos</h3>
+                                    <p>Descarga toda tu información personal y actividad</p>
+                                </div>
+                                <button class="btn btn-outline">
+                                    <i class="fas fa-download"></i>
+                                    Descargar
+                                </button>
+                            </div>
+
+                            <div class="danger-action">
+                                <div>
+                                    <h3>Eliminar cuenta</h3>
+                                    <p>Esta acción es permanente y no se puede deshacer</p>
+                                </div>
+                                <button class="btn btn-danger">
+                                    <i class="fas fa-trash-alt"></i>
+                                    Eliminar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Cambio de pestañas
+            const tabItems = document.querySelectorAll('.nav-item');
+            const tabPanes = document.querySelectorAll('.tab-pane');
+
+            tabItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    const tabId = this.getAttribute('data-tab');
+
+                    // Actualizar pestañas activas
+                    tabItems.forEach(tab => tab.classList.remove('active'));
+                    this.classList.add('active');
+
+                    // Mostrar contenido de pestaña
+                    tabPanes.forEach(pane => pane.classList.remove('active'));
+                    document.getElementById(tabId).classList.add('active');
+                });
+            });
+
+            // Mostrar/ocultar contraseñas
+            const toggleButtons = document.querySelectorAll('.password-toggle');
+            toggleButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const input = this.previousElementSibling;
+                    const icon = this.querySelector('i');
+
+                    if (input.type === 'password') {
+                        input.type = 'text';
+                        icon.classList.remove('fa-eye');
+                        icon.classList.add('fa-eye-slash');
+                    } else {
+                        input.type = 'password';
+                        icon.classList.remove('fa-eye-slash');
+                        icon.classList.add('fa-eye');
+                    }
+                });
+            });
+
+            // Medidor de fortaleza de contraseña
+            const passwordInput = document.getElementById('{{ form.plainPassword.vars.id }}');
+            const strengthBar = document.querySelector('.strength-bar');
+            const strengthText = document.querySelector('.strength-text');
+
+            if (passwordInput) {
+                passwordInput.addEventListener('input', function() {
+                    const password = this.value;
+                    let strength = 0;
+                    let message = '';
+
+                    if (password.length > 0) {
+                        // Criterios de fortaleza
+                        if (password.length >= 8) strength += 25;
+                        if (password.match(/[a-z]+/)) strength += 25;
+                        if (password.match(/[A-Z]+/)) strength += 25;
+                        if (password.match(/[0-9]+/)) strength += 15;
+                        if (password.match(/[^a-zA-Z0-9]+/)) strength += 10;
+
+                        // Mensajes según fortaleza
+                        if (strength < 30) {
+                            message = 'Muy débil';
+                            strengthBar.style.backgroundColor = '#ff4d4d';
+                        } else if (strength < 60) {
+                            message = 'Débil';
+                            strengthBar.style.backgroundColor = '#ffa64d';
+                        } else if (strength < 80) {
+                            message = 'Buena';
+                            strengthBar.style.backgroundColor = '#ffff4d';
+                        } else {
+                            message = 'Fuerte';
+                            strengthBar.style.backgroundColor = '#4dff4d';
+                        }
+                    } else {
+                        message = 'Introduce una contraseña';
+                    }
+
+                    strengthBar.style.width = strength + '%';
+                    strengthText.textContent = message;
+                });
+            }
+
+            // Simulación de carga de avatar
+            const avatarUpload = document.getElementById('avatar-upload');
+            const avatarPlaceholder = document.querySelector('.avatar-placeholder');
+
+            if (avatarUpload) {
+                avatarUpload.addEventListener('change', function(e) {
+                    if (e.target.files && e.target.files[0]) {
+                        const reader = new FileReader();
+
+                        reader.onload = function(e) {
+                            if (avatarPlaceholder) {
+                                avatarPlaceholder.innerHTML = '';
+                                const img = document.createElement('img');
+                                img.src = e.target.result;
+                                img.alt = 'Avatar';
+                                avatarPlaceholder.appendChild(img);
+                            } else {
+                                const avatarContainer = document.querySelector('.profile-avatar');
+                                const img = avatarContainer.querySelector('img');
+                                img.src = e.target.result;
+                            }
+                        }
+
+                        reader.readAsDataURL(e.target.files[0]);
+                    }
+                });
+            }
+        });
+    </script>
 {% endblock %}
